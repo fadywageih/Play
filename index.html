@@ -80,6 +80,11 @@
       box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
     }
 
+    /* مؤثر اهتزاز عند محاولة الضغط (اختياري لكن حلو) */
+    .shake {
+      animation: shake 0.3s ease;
+    }
+
     img {
       width: 160px;
       max-width: 100%;
@@ -208,6 +213,12 @@
       to { transform: scale(1); opacity: 1; }
     }
 
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
     @media (max-width: 480px) {
       .container { padding: 25px 15px; }
       h1 { font-size: 22px; }
@@ -258,8 +269,12 @@
     const heartsContainer = document.getElementById("heartsContainer");
     const finalMessage = document.getElementById("finalMessage");
 
-    // هروب زر No
-    noBtn.addEventListener("mouseover", () => {
+    // وظيفة تهرب الزر
+    function moveNoButton() {
+      // إضافة مؤثر اهتزاز قصير
+      noBtn.classList.add('shake');
+      setTimeout(() => noBtn.classList.remove('shake'), 300);
+
       const containerRect = questionContainer.getBoundingClientRect();
       const btnRect = noBtn.getBoundingClientRect();
       const availableWidth = containerRect.width - btnRect.width - 30;
@@ -271,6 +286,21 @@
       noBtn.style.top = `${newY}px`;
       noBtn.style.right = 'auto';
       noBtn.style.bottom = 'auto';
+    }
+
+    // الكمبيوتر: يهرب عند التمرير
+    noBtn.addEventListener("mouseover", moveNoButton);
+
+    // الموبايل: يهرب عند اللمس (بدون تنفيذ الضغط)
+    noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      moveNoButton();
+    });
+
+    // منع الضغط النهائي على "No" بأي طريقة
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      moveNoButton();
     });
 
     // عند الضغط على Yes
@@ -278,7 +308,6 @@
       questionContainer.style.display = "none";
       resultContainer.style.display = "flex";
 
-      // بعد 1.5 ثانية، اعرض الـ Modal
       setTimeout(() => {
         messageModal.style.display = "flex";
         userMessageInput.focus();
@@ -288,21 +317,16 @@
     // عند الضغط على OK
     okBtn.addEventListener("click", () => {
       const msg = userMessageInput.value.trim();
-      // يمكنك لاحقًا استخدام الرسالة (مثل إرسالها أو حفظها)
       console.log("الرسالة:", msg || "لم يكتب رسالة");
 
-      // إخفاء كل العناصر
       resultContainer.style.display = "none";
       messageModal.style.display = "none";
 
-      // إنشاء خلفية القلوب
       createHearts();
-
-      // إظهار الرسالة النهائية
       finalMessage.style.display = "block";
     });
 
-    // إنشاء القلوب المتحركة
+    // إنشاء القلوب
     function createHearts() {
       const colors = ["#ff4da6", "#ff80ab", "#ff6b9d", "#ff9ec4"];
       const totalHearts = 100;
